@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import time
 from itertools import takewhile
 import operator
@@ -24,7 +25,7 @@ class IStorage(ABC):
         """
 
     @abstractmethod
-    def get(self, key, default=None):
+    def get(self, key, default=None, data=None):
         """
         Get given key.  If not found, return default.
         """
@@ -61,8 +62,9 @@ class ForgetfulStorage(IStorage):
         for _, _ in self.iter_older_than(self.ttl):
             self.data.popitem(last=False)
 
-    def get(self, key, default=None):
+    def get(self, key, default=None, data=None):
         self.cull()
+        print(f"{data=}")
         if key in self.data:
             return self[key]
         return default

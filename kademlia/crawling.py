@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from collections import Counter
 import logging
 
@@ -13,7 +14,7 @@ class SpiderCrawl:
     """
     Crawl the network and look for given 160-bit keys.
     """
-    def __init__(self, protocol, node, peers, ksize, alpha):
+    def __init__(self, protocol, node, peers, ksize, alpha, data=None):
         """
         Create a new C{SpiderCrawl}er.
 
@@ -32,16 +33,15 @@ class SpiderCrawl:
         self.node = node
         self.nearest = NodeHeap(self.node, self.ksize)
         self.last_ids_crawled = []
+        self.data = data
         log.info("creating spider with peers: %s", peers)
         self.nearest.push(peers)
 
-    async def _find(self, rpcmethod):
+    async def _find(self, rpcmethod, data=None):
         """
         Get either a value or list of nodes.
-
         Args:
             rpcmethod: The protocol's callfindValue or call_find_node.
-
         The process:
           1. calls find_* to current ALPHA nearest not already queried nodes,
              adding results to current nearest list of k nodes.
@@ -59,7 +59,7 @@ class SpiderCrawl:
 
         dicts = {}
         for peer in self.nearest.get_uncontacted()[:count]:
-            dicts[peer.id] = rpcmethod(peer, self.node)
+            dicts[peer.id] = rpcmethod(peer, self.node, data)
             self.nearest.mark_contacted(peer)
         found = await gather_dict(dicts)
         return await self._nodes_found(found)
@@ -69,8 +69,8 @@ class SpiderCrawl:
 
 
 class ValueSpiderCrawl(SpiderCrawl):
-    def __init__(self, protocol, node, peers, ksize, alpha):
-        SpiderCrawl.__init__(self, protocol, node, peers, ksize, alpha)
+    def __init__(self, protocol, node, peers, ksize, alpha, data=None):
+        super().__init__(protocol, node, peers, ksize, alpha, data)
         # keep track of the single nearest node without value - per
         # section 2.3 so we can set the key there if found
         self.nearest_without_value = NodeHeap(self.node, 1)
@@ -79,7 +79,7 @@ class ValueSpiderCrawl(SpiderCrawl):
         """
         Find either the closest nodes or the value requested.
         """
-        return await self._find(self.protocol.call_find_value)
+        return await self._find(self.protocol.call_find_value, self.data)
 
     async def _nodes_found(self, responses):
         """

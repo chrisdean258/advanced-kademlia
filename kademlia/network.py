@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Package for interacting on the network at a high level.
 """
@@ -133,7 +134,7 @@ class Server:
         result = await self.protocol.ping(addr, self.node.id)
         return Node(result[1], addr[0], addr[1]) if result[0] else None
 
-    async def get(self, key):
+    async def get(self, key, data=None):
         """
         Get a key if the network has it.
 
@@ -143,15 +144,16 @@ class Server:
         log.info("Looking up key %s", key)
         dkey = digest(key)
         # if this node has it, return it
-        if self.storage.get(dkey) is not None:
-            return self.storage.get(dkey)
+        val = self.storage.get(dkey, data=data)
+        if val is not None:
+            return val
         node = Node(dkey)
         nearest = self.protocol.router.find_neighbors(node)
         if not nearest:
             log.warning("There are no known neighbors to get key %s", key)
             return None
         spider = ValueSpiderCrawl(self.protocol, node, nearest,
-                                  self.ksize, self.alpha)
+                                  self.ksize, self.alpha, data)
         return await spider.find()
 
     async def set(self, key, value):

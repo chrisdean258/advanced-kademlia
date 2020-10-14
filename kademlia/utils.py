@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 General catchall for functions that don't make sense as methods.
 """

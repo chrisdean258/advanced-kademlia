@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import random
 import asyncio
 import logging
@@ -53,24 +54,24 @@ class KademliaProtocol(RPCProtocol):
         neighbors = self.router.find_neighbors(node, exclude=source)
         return list(map(tuple, neighbors))
 
-    def rpc_find_value(self, sender, nodeid, key):
+    def rpc_find_value(self, sender, nodeid, key, data=None):
         source = Node(nodeid, sender[0], sender[1])
         self.welcome_if_new(source)
-        value = self.storage.get(key, None)
+        value = self.storage.get(key, None, data=data)
         if value is None:
             return self.rpc_find_node(sender, nodeid, key)
         return {'value': value}
 
-    async def call_find_node(self, node_to_ask, node_to_find):
+    async def call_find_node(self, node_to_ask, node_to_find, data=None):
         address = (node_to_ask.ip, node_to_ask.port)
         result = await self.find_node(address, self.source_node.id,
                                       node_to_find.id)
         return self.handle_call_response(result, node_to_ask)
 
-    async def call_find_value(self, node_to_ask, node_to_find):
+    async def call_find_value(self, node_to_ask, node_to_find, data=None):
         address = (node_to_ask.ip, node_to_ask.port)
         result = await self.find_value(address, self.source_node.id,
-                                       node_to_find.id)
+                                       node_to_find.id, data)
         return self.handle_call_response(result, node_to_ask)
 
     async def call_ping(self, node_to_ask):

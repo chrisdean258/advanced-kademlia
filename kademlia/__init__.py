@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Kademlia is a Python implementation of the Kademlia protocol which
 utilizes the asyncio library.
