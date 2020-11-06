@@ -2,6 +2,8 @@
 
 This project is a for of the kademlia library. The only changes that are intended for this is adding a data field to lookups that allows additional unhashed data to be associated with a lookup. 
 
+Ovbiously the install instructions are for the official project. For this project you will need to clone the repository
+
 # Python Distributed Hash Table
 [![Build Status](https://secure.travis-ci.org/bmuller/kademlia.png?branch=master)](https://travis-ci.org/bmuller/kademlia)
 [![Docs Status](https://readthedocs.org/projects/kademlia/badge/?version=latest)](http://kademlia.readthedocs.org)

@@ -64,7 +64,6 @@ class ForgetfulStorage(IStorage):
 
     def get(self, key, default=None, data=None):
         self.cull()
-        print(f"{data=}")
         if key in self.data:
             return self[key]
         return default
